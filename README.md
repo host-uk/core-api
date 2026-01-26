@@ -1,138 +1,155 @@
-# Core PHP Framework Project
+# Core API Package
 
-[![CI](https://github.com/host-uk/core-template/actions/workflows/ci.yml/badge.svg)](https://github.com/host-uk/core-template/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/host-uk/core-template/graph/badge.svg)](https://codecov.io/gh/host-uk/core-template)
-[![PHP Version](https://img.shields.io/packagist/php-v/host-uk/core-template)](https://packagist.org/packages/host-uk/core-template)
-[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel)](https://laravel.com)
-[![License](https://img.shields.io/badge/License-EUPL--1.2-blue.svg)](LICENSE)
-
-A modular monolith Laravel application built with Core PHP Framework.
-
-## Features
-
-- **Core Framework** - Event-driven module system with lazy loading
-- **Admin Panel** - Livewire-powered admin interface with Flux UI
-- **REST API** - Scoped API keys, rate limiting, webhooks, OpenAPI docs
-- **MCP Tools** - Model Context Protocol for AI agent integration
-
-## Requirements
-
-- PHP 8.2+
-- Composer 2.x
-- SQLite (default) or MySQL/PostgreSQL
-- Node.js 18+ (for frontend assets)
+REST API infrastructure with OpenAPI documentation, rate limiting, webhook signing, and secure API key management.
 
 ## Installation
 
 ```bash
-# Clone or create from template
-git clone https://github.com/host-uk/core-template.git my-project
-cd my-project
-
-# Install dependencies
-composer install
-npm install
-
-# Configure environment
-cp .env.example .env
-php artisan key:generate
-
-# Set up database
-touch database/database.sqlite
-php artisan migrate
-
-# Start development server
-php artisan serve
+composer require host-uk/core-api
 ```
 
-Visit: http://localhost:8000
+## Features
 
-## Project Structure
-
-```
-app/
-├── Console/      # Artisan commands
-├── Http/         # Controllers & Middleware
-├── Models/       # Eloquent models
-├── Mod/          # Your custom modules
-└── Providers/    # Service providers
-
-config/
-└── core.php      # Core framework configuration
-
-routes/
-├── web.php       # Public web routes
-├── api.php       # REST API routes
-└── console.php   # Artisan commands
-```
-
-## Creating Modules
-
-```bash
-# Create a new module with all features
-php artisan make:mod Blog --all
-
-# Create module with specific features
-php artisan make:mod Shop --web --api --admin
-```
-
-Modules follow the event-driven pattern:
+### OpenAPI/Swagger Documentation
+Auto-generated API documentation with multiple UI options:
 
 ```php
-<?php
+use Core\Mod\Api\Documentation\Attributes\{ApiTag, ApiResponse};
 
-namespace App\Mod\Blog;
-
-use Core\Events\WebRoutesRegistering;
-use Core\Events\ApiRoutesRegistering;
-use Core\Events\AdminPanelBooting;
-
-class Boot
+#[ApiTag('Products')]
+#[ApiResponse(200, ProductResource::class)]
+class ProductController extends Controller
 {
-    public static array $listens = [
-        WebRoutesRegistering::class => 'onWebRoutes',
-        ApiRoutesRegistering::class => 'onApiRoutes',
-        AdminPanelBooting::class => 'onAdminPanel',
-    ];
-
-    public function onWebRoutes(WebRoutesRegistering $event): void
+    public function index()
     {
-        $event->routes(fn() => require __DIR__.'/Routes/web.php');
-        $event->views('blog', __DIR__.'/Views');
+        return ProductResource::collection(Product::paginate());
     }
 }
 ```
 
-## Core Packages
+**Access documentation:**
+- `GET /api/docs` - Scalar UI (default)
+- `GET /api/docs/swagger` - Swagger UI
+- `GET /api/docs/redoc` - ReDoc
+- `GET /api/docs/openapi.json` - OpenAPI spec
 
-| Package | Description |
-|---------|-------------|
-| `host-uk/core` | Core framework components |
-| `host-uk/core-admin` | Admin panel & Livewire modals |
-| `host-uk/core-api` | REST API with scopes & webhooks |
-| `host-uk/core-mcp` | Model Context Protocol tools |
+### Secure API Keys
+Bcrypt hashing with backward compatibility:
 
-## Flux Pro (Optional)
+```php
+use Core\Mod\Api\Models\ApiKey;
 
-This template uses the free Flux UI components. If you have a Flux Pro license:
+$key = ApiKey::create([
+    'name' => 'Production API',
+    'workspace_id' => $workspace->id,
+    'scopes' => ['read', 'write'],
+]);
 
-```bash
-# Configure authentication
-composer config http-basic.composer.fluxui.dev your-email your-license-key
-
-# Add the repository
-composer config repositories.flux-pro composer https://composer.fluxui.dev
-
-# Install Flux Pro
-composer require livewire/flux-pro
+// Returns the plain key (shown only once)
+$plainKey = $key->getPlainKey();
 ```
 
-## Documentation
+**Features:**
+- Bcrypt hashing for new keys
+- Legacy SHA-256 support
+- Key rotation with grace periods
+- Scope-based permissions
 
-- [Core PHP Framework](https://github.com/host-uk/core-php)
-- [Getting Started Guide](https://host-uk.github.io/core-php/guide/)
-- [Architecture](https://host-uk.github.io/core-php/architecture/)
+### Rate Limiting
+Granular rate limiting per endpoint:
+
+```php
+use Core\Mod\Api\RateLimit\RateLimit;
+
+#[RateLimit(limit: 100, window: 60, burst: 1.2)]
+class ProductController extends Controller
+{
+    // Limited to 100 requests per 60 seconds
+    // With 20% burst allowance
+}
+```
+
+**Features:**
+- Per-endpoint limits
+- Workspace isolation
+- Tier-based limits
+- Standard headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+
+### Webhook Signing
+HMAC-SHA256 signatures for outbound webhooks:
+
+```php
+use Core\Mod\Api\Models\WebhookEndpoint;
+
+$endpoint = WebhookEndpoint::create([
+    'url' => 'https://example.com/webhooks',
+    'events' => ['order.created', 'order.updated'],
+    'secret' => WebhookEndpoint::generateSecret(),
+]);
+```
+
+**Verification:**
+```php
+$signature = hash_hmac('sha256', $timestamp . '.' . $payload, $secret);
+hash_equals($signature, $request->header('X-Webhook-Signature'));
+```
+
+### Scope Enforcement
+Fine-grained API permissions:
+
+```php
+use Core\Mod\Api\Middleware\EnforceApiScope;
+
+Route::middleware(['api', EnforceApiScope::class.':write'])
+    ->post('/products', [ProductController::class, 'store']);
+```
+
+## Configuration
+
+```php
+// config/api.php (after php artisan vendor:publish --tag=api-config)
+
+return [
+    'rate_limits' => [
+        'default' => 60,
+        'tiers' => [
+            'free' => 100,
+            'pro' => 1000,
+            'enterprise' => 10000,
+        ],
+    ],
+    'docs' => [
+        'enabled' => env('API_DOCS_ENABLED', true),
+        'require_auth' => env('API_DOCS_REQUIRE_AUTH', false),
+    ],
+];
+```
+
+## API Guides
+
+The package includes comprehensive guides:
+
+- **Authentication** - API key creation and usage
+- **Quick Start** - Getting started in 5 minutes
+- **Rate Limiting** - Understanding limits and tiers
+- **Webhooks** - Setting up and verifying webhooks
+- **Errors** - Error codes and handling
+
+Access at: `/api/guides`
+
+## Requirements
+
+- PHP 8.2+
+- Laravel 11+ or 12+
+
+## Changelog
+
+See [changelog/2026/jan/features.md](changelog/2026/jan/features.md) for recent changes.
+
+## Security
+
+See [changelog/2026/jan/security.md](changelog/2026/jan/security.md) for security updates.
 
 ## License
 
-EUPL-1.2 (European Union Public Licence)
+EUPL-1.2 - See [LICENSE](../../LICENSE) for details.
