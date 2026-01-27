@@ -10,7 +10,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Core\\Mod\\Api\\": "src/Mod/Api/",
+            "Core\\Api\\": "src/Api/",
             "Core\\Website\\Api\\": "src/Website/Api/"
         }
     },
