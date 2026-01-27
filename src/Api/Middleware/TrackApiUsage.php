@@ -7,8 +7,8 @@ namespace Core\Api\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Mod\Api\Models\ApiKey;
-use Mod\Api\Services\ApiUsageService;
+use Core\Api\Models\ApiKey;
+use Core\Api\Services\ApiUsageService;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

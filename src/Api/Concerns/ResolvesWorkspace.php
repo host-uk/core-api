@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Core\Api\Concerns;
 
 use Illuminate\Http\Request;
-use Core\Mod\Tenant\Models\User;
-use Core\Mod\Tenant\Models\Workspace;
+use Core\Tenant\Models\User;
+use Core\Tenant\Models\Workspace;
 
 /**
  * Resolve workspace from request context.

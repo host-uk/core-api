@@ -12,7 +12,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *
  * Transforms Workspace models into API responses.
  *
- * @mixin \Core\Mod\Tenant\Models\Workspace
+ * @mixin \Core\Tenant\Models\Workspace
  */
 class WorkspaceResource extends JsonResource
 {

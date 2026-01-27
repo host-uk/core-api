@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Api\Concerns;
 
-use Core\Mod\Tenant\Models\UserToken;
+use Core\Tenant\Models\UserToken;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 

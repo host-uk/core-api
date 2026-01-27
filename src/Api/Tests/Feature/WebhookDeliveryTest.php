@@ -7,7 +7,7 @@ use Core\Api\Models\WebhookDelivery;
 use Core\Api\Models\WebhookEndpoint;
 use Core\Api\Services\WebhookService;
 use Core\Api\Services\WebhookSignature;
-use Core\Mod\Tenant\Models\Workspace;
+use Core\Tenant\Models\Workspace;
 use Illuminate\Support\Facades\Http;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);

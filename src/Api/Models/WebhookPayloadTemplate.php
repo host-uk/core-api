@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Core\Api\Models;
 
-use Core\Mod\Tenant\Concerns\BelongsToNamespace;
-use Core\Mod\Tenant\Models\Workspace;
+use Core\Tenant\Concerns\BelongsToNamespace;
+use Core\Tenant\Models\Workspace;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

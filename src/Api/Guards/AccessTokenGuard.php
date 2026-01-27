@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Core\Api\Guards;
 
-use Core\Mod\Tenant\Models\User;
-use Core\Mod\Tenant\Models\UserToken;
+use Core\Tenant\Models\User;
+use Core\Tenant\Models\UserToken;
 use Illuminate\Contracts\Auth\Factory;
 use Illuminate\Http\Request;
 

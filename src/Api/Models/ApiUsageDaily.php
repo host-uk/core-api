@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Mod\Api\Models;
+namespace Core\Api\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
-use Mod\Tenant\Models\Workspace;
+use Core\Tenant\Models\Workspace;
 
 /**
  * API Usage Daily - aggregated daily API statistics.

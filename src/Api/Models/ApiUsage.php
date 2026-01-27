@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Mod\Api\Models;
+namespace Core\Api\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Mod\Tenant\Models\Workspace;
+use Core\Tenant\Models\Workspace;
 
 /**
  * API Usage - individual API request log entry.

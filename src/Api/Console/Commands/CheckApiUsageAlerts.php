@@ -7,7 +7,7 @@ namespace Core\Api\Console\Commands;
 use Core\Api\Models\ApiKey;
 use Core\Api\Notifications\HighApiUsageNotification;
 use Core\Api\RateLimit\RateLimitService;
-use Core\Mod\Tenant\Models\Workspace;
+use Core\Tenant\Models\Workspace;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
