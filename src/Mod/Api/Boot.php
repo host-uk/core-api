@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Core\Mod\Api;
 
+use Core\Events\AdminPanelBooting;
 use Core\Events\ApiRoutesRegistering;
 use Core\Events\ConsoleBooting;
 use Core\Mod\Api\Documentation\DocumentationServiceProvider;
 use Core\Mod\Api\RateLimit\RateLimitService;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,6 +36,7 @@ class Boot extends ServiceProvider
      * @var array<class-string, string>
      */
     public static array $listens = [
+        AdminPanelBooting::class => 'onAdminPanel',
         ApiRoutesRegistering::class => 'onApiRoutes',
         ConsoleBooting::class => 'onConsole',
     ];
@@ -51,6 +56,10 @@ class Boot extends ServiceProvider
             return new RateLimitService($app->make(CacheRepository::class));
         });
 
+        // Register webhook services
+        $this->app->singleton(Services\WebhookTemplateService::class);
+        $this->app->singleton(Services\WebhookSecretRotationService::class);
+
         // Register API Documentation provider
         $this->app->register(DocumentationServiceProvider::class);
     }
@@ -61,11 +70,47 @@ class Boot extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/Migrations');
+        $this->configureRateLimiting();
+    }
+
+    /**
+     * Configure rate limiters for API endpoints.
+     */
+    protected function configureRateLimiting(): void
+    {
+        // Rate limit for webhook template operations: 30 per minute per user
+        RateLimiter::for('api-webhook-templates', function (Request $request) {
+            $user = $request->user();
+
+            return $user
+                ? Limit::perMinute(30)->by('user:'.$user->id)
+                : Limit::perMinute(10)->by($request->ip());
+        });
+
+        // Rate limit for template preview/validation: 60 per minute per user
+        RateLimiter::for('api-template-preview', function (Request $request) {
+            $user = $request->user();
+
+            return $user
+                ? Limit::perMinute(60)->by('user:'.$user->id)
+                : Limit::perMinute(20)->by($request->ip());
+        });
     }
 
     // -------------------------------------------------------------------------
     // Event-driven handlers
     // -------------------------------------------------------------------------
+
+    public function onAdminPanel(AdminPanelBooting $event): void
+    {
+        $event->views($this->moduleName, __DIR__.'/View/Blade');
+
+        if (file_exists(__DIR__.'/Routes/admin.php')) {
+            $event->routes(fn () => require __DIR__.'/Routes/admin.php');
+        }
+
+        $event->livewire('api.webhook-template-manager', View\Modal\Admin\WebhookTemplateManager::class);
+    }
 
     public function onApiRoutes(ApiRoutesRegistering $event): void
     {
