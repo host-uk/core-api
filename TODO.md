@@ -42,14 +42,15 @@
 
 ### Medium Priority
 
-- [ ] **Test Coverage: OpenAPI Documentation** - Test spec generation
-  - [ ] Test OpenApiBuilder with controller scanning
-  - [ ] Test #[ApiParameter] attribute parsing
-  - [ ] Test #[ApiResponse] rendering
-  - [ ] Test #[ApiSecurity] requirements
-  - [ ] Test #[ApiHidden] filtering
-  - [ ] Test extension system
-  - **Estimated effort:** 4-5 hours
+- [x] **Test Coverage: OpenAPI Documentation** - Test spec generation
+  - [x] Test OpenApiBuilder with controller scanning
+  - [x] Test #[ApiParameter] attribute parsing
+  - [x] Test #[ApiResponse] rendering
+  - [x] Test #[ApiSecurity] requirements
+  - [x] Test #[ApiHidden] filtering
+  - [x] Test extension system
+  - **Completed:** 29 January 2026
+  - **File:** `src/Api/Tests/Feature/OpenApiDocumentationComprehensiveTest.php`
 
 - [ ] **Test Coverage: Usage Alerts** - Test quota monitoring
   - [ ] Test CheckApiUsageAlerts command
@@ -255,5 +256,6 @@
 - [x] **API Key IP Whitelisting** - allowed_ips column with IPv4/IPv6 and CIDR support (P1-004)
 - [x] **Scope Enforcement Tests** - Wildcard scopes, inheritance, and error responses (P2-008)
 - [x] **Rate Limiting Tests** - Tier-based limits with headers and burst allowance
+- [x] **OpenAPI Documentation Tests** - Schema generation, attribute parsing, extensions (P2-009)
 
 *See `changelog/2026/jan/` for completed features.*
