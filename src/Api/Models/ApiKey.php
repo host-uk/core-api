@@ -266,10 +266,45 @@ class ApiKey extends Model
 
     /**
      * Check if key has a specific scope.
+     *
+     * Supports wildcard matching:
+     * - `posts:*` grants all actions on posts resource
+     * - `*:read` grants read action on all resources
+     * - `*` grants full access to everything
      */
     public function hasScope(string $scope): bool
     {
-        return in_array($scope, $this->scopes ?? [], true);
+        $scopes = $this->scopes ?? [];
+
+        // Exact match
+        if (in_array($scope, $scopes, true)) {
+            return true;
+        }
+
+        // Full wildcard (grants everything)
+        if (in_array('*', $scopes, true)) {
+            return true;
+        }
+
+        // Check for resource:action pattern
+        if (! str_contains($scope, ':')) {
+            // Simple scope (read, write, delete) - no wildcard matching
+            return false;
+        }
+
+        [$resource, $action] = explode(':', $scope, 2);
+
+        // Resource wildcard (e.g., posts:* grants posts:read, posts:write, etc.)
+        if (in_array("{$resource}:*", $scopes, true)) {
+            return true;
+        }
+
+        // Action wildcard (e.g., *:read grants posts:read, users:read, etc.)
+        if (in_array("*:{$action}", $scopes, true)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -284,6 +319,20 @@ class ApiKey extends Model
         }
 
         return true;
+    }
+
+    /**
+     * Check if key has any of the specified scopes.
+     */
+    public function hasAnyScope(array $scopes): bool
+    {
+        foreach ($scopes as $scope) {
+            if ($this->hasScope($scope)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

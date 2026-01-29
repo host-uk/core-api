@@ -23,20 +23,22 @@
   - **Completed:** 29 January 2026
   - **File:** `src/Api/Tests/Feature/WebhookDeliveryTest.php`
 
-- [ ] **Test Coverage: Rate Limiting** - Test tier-based limits
-  - [ ] Test per-tier rate limits
-  - [ ] Test rate limit headers
-  - [ ] Test quota exceeded responses
-  - [ ] Test workspace-scoped limits
-  - [ ] Test burst allowance
-  - **Estimated effort:** 3-4 hours
+- [x] **Test Coverage: Rate Limiting** - Test tier-based limits
+  - [x] Test per-tier rate limits
+  - [x] Test rate limit headers
+  - [x] Test quota exceeded responses
+  - [x] Test workspace-scoped limits
+  - [x] Test burst allowance
+  - **Completed:** 29 January 2026
+  - **File:** `src/Api/Tests/Feature/RateLimitingTest.php`
 
-- [ ] **Test Coverage: Scope Enforcement** - Test permission system
-  - [ ] Test EnforceApiScope middleware
-  - [ ] Test wildcard scopes (posts:*, *:read)
-  - [ ] Test scope inheritance
-  - [ ] Test scope validation errors
-  - **Estimated effort:** 3-4 hours
+- [x] **Test Coverage: Scope Enforcement** - Test permission system
+  - [x] Test EnforceApiScope middleware
+  - [x] Test wildcard scopes (posts:*, *:read)
+  - [x] Test scope inheritance
+  - [x] Test scope validation errors
+  - **Completed:** 29 January 2026
+  - **File:** `src/Api/Tests/Feature/ApiScopeEnforcementTest.php`
 
 ### Medium Priority
 
@@ -251,5 +253,7 @@
 - [x] **API Key Security Tests** - Comprehensive bcrypt hashing and rotation tests (P1-002)
 - [x] **Webhook System Signature Tests** - HMAC-SHA256 signature verification tests (P1-003)
 - [x] **API Key IP Whitelisting** - allowed_ips column with IPv4/IPv6 and CIDR support (P1-004)
+- [x] **Scope Enforcement Tests** - Wildcard scopes, inheritance, and error responses (P2-008)
+- [x] **Rate Limiting Tests** - Tier-based limits with headers and burst allowance
 
 *See `changelog/2026/jan/` for completed features.*
