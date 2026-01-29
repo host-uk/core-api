@@ -89,4 +89,36 @@ trait HasApiResponses
             'errors' => $errors,
         ], 422);
     }
+
+    /**
+     * Return an invalid status error response.
+     *
+     * Used when an operation cannot be performed due to the resource's current status.
+     */
+    protected function invalidStatusResponse(string $message): JsonResponse
+    {
+        return response()->json([
+            'error' => 'invalid_status',
+            'message' => $message,
+        ], 422);
+    }
+
+    /**
+     * Return a provider error response.
+     *
+     * Used when an external provider operation fails.
+     */
+    protected function providerErrorResponse(string $message, ?string $provider = null): JsonResponse
+    {
+        $response = [
+            'error' => 'provider_error',
+            'message' => $message,
+        ];
+
+        if ($provider !== null) {
+            $response['provider'] = $provider;
+        }
+
+        return response()->json($response, 400);
+    }
 }
