@@ -60,6 +60,9 @@ class Boot extends ServiceProvider
         $this->app->singleton(Services\WebhookTemplateService::class);
         $this->app->singleton(Services\WebhookSecretRotationService::class);
 
+        // Register IP restriction service for API key whitelisting
+        $this->app->singleton(Services\IpRestrictionService::class);
+
         // Register API Documentation provider
         $this->app->register(DocumentationServiceProvider::class);
     }

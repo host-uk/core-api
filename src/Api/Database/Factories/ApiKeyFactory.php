@@ -55,6 +55,7 @@ class ApiKeyFactory extends Factory
             'prefix' => $prefix,
             'scopes' => [ApiKey::SCOPE_READ, ApiKey::SCOPE_WRITE],
             'server_scopes' => null,
+            'allowed_ips' => null,
             'last_used_at' => null,
             'expires_at' => null,
             'grace_period_ends_at' => null,
@@ -216,6 +217,18 @@ class ApiKeyFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'server_scopes' => $servers,
+        ]);
+    }
+
+    /**
+     * Set IP whitelist restrictions.
+     *
+     * @param  array<string>|null  $ips  Array of IP addresses/CIDRs
+     */
+    public function withAllowedIps(?array $ips): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'allowed_ips' => $ips,
         ]);
     }
 

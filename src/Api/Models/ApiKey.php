@@ -64,6 +64,7 @@ class ApiKey extends Model
         'prefix',
         'scopes',
         'server_scopes',
+        'allowed_ips',
         'last_used_at',
         'expires_at',
         'grace_period_ends_at',
@@ -73,6 +74,7 @@ class ApiKey extends Model
     protected $casts = [
         'scopes' => 'array',
         'server_scopes' => 'array',
+        'allowed_ips' => 'array',
         'last_used_at' => 'datetime',
         'expires_at' => 'datetime',
         'grace_period_ends_at' => 'datetime',
@@ -208,9 +210,10 @@ class ApiKey extends Model
             $this->expires_at
         );
 
-        // Copy server scopes to new key
+        // Copy server scopes and IP restrictions to new key
         $result['api_key']->update([
             'server_scopes' => $this->server_scopes,
+            'allowed_ips' => $this->allowed_ips,
             'rotated_from_id' => $this->id,
         ]);
 
@@ -310,6 +313,57 @@ class ApiKey extends Model
     public function getAllowedServers(): ?array
     {
         return $this->server_scopes;
+    }
+
+    /**
+     * Check if this key has IP restrictions enabled.
+     */
+    public function hasIpRestrictions(): bool
+    {
+        return ! empty($this->allowed_ips);
+    }
+
+    /**
+     * Get the allowed IPs list (null = all IPs allowed).
+     *
+     * @return array<string>|null
+     */
+    public function getAllowedIps(): ?array
+    {
+        return $this->allowed_ips;
+    }
+
+    /**
+     * Update the IP whitelist.
+     *
+     * @param  array<string>|null  $ips  Array of IP addresses/CIDRs, or null to allow all
+     */
+    public function updateAllowedIps(?array $ips): void
+    {
+        $this->update(['allowed_ips' => $ips]);
+    }
+
+    /**
+     * Add an IP or CIDR to the whitelist.
+     */
+    public function addAllowedIp(string $ipOrCidr): void
+    {
+        $whitelist = $this->allowed_ips ?? [];
+
+        if (! in_array($ipOrCidr, $whitelist, true)) {
+            $whitelist[] = $ipOrCidr;
+            $this->update(['allowed_ips' => $whitelist]);
+        }
+    }
+
+    /**
+     * Remove an IP or CIDR from the whitelist.
+     */
+    public function removeAllowedIp(string $ipOrCidr): void
+    {
+        $whitelist = $this->allowed_ips ?? [];
+        $whitelist = array_values(array_filter($whitelist, fn ($entry) => $entry !== $ipOrCidr));
+        $this->update(['allowed_ips' => empty($whitelist) ? null : $whitelist]);
     }
 
     /**

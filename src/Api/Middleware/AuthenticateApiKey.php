@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Core\Api\Middleware;
 
 use Core\Api\Models\ApiKey;
+use Core\Api\Services\IpRestrictionService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,6 +58,16 @@ class AuthenticateApiKey
 
         if ($apiKey->isExpired()) {
             return $this->unauthorized('API key has expired');
+        }
+
+        // Check IP whitelist if restrictions are enabled
+        if ($apiKey->hasIpRestrictions()) {
+            $ipService = app(IpRestrictionService::class);
+            $requestIp = $request->ip();
+
+            if (! $ipService->isIpAllowed($requestIp, $apiKey->getAllowedIps() ?? [])) {
+                return $this->forbidden('IP address not allowed for this API key');
+            }
         }
 
         // Check scope if required

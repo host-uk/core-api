@@ -4,22 +4,24 @@
 
 ### High Priority
 
-- [ ] **Test Coverage: API Key Security** - Test bcrypt hashing and rotation
-  - [ ] Test API key creation with bcrypt hashing
-  - [ ] Test API key authentication
-  - [ ] Test key rotation with grace period
-  - [ ] Test key revocation
-  - [ ] Test scoped key access
-  - **Estimated effort:** 3-4 hours
+- [x] **Test Coverage: API Key Security** - Test bcrypt hashing and rotation
+  - [x] Test API key creation with bcrypt hashing
+  - [x] Test API key authentication
+  - [x] Test key rotation with grace period
+  - [x] Test key revocation
+  - [x] Test scoped key access
+  - **Completed:** 29 January 2026
+  - **File:** `src/Api/Tests/Feature/ApiKeySecurityTest.php`
 
-- [ ] **Test Coverage: Webhook System** - Test delivery and signatures
-  - [ ] Test webhook endpoint registration
-  - [ ] Test HMAC-SHA256 signature generation
-  - [ ] Test signature verification
-  - [ ] Test webhook delivery retry logic
-  - [ ] Test exponential backoff
-  - [ ] Test delivery status tracking
-  - **Estimated effort:** 4-5 hours
+- [x] **Test Coverage: Webhook System** - Test delivery and signatures
+  - [x] Test webhook endpoint registration
+  - [x] Test HMAC-SHA256 signature generation
+  - [x] Test signature verification
+  - [x] Test webhook delivery retry logic
+  - [x] Test exponential backoff
+  - [x] Test delivery status tracking
+  - **Completed:** 29 January 2026
+  - **File:** `src/Api/Tests/Feature/WebhookDeliveryTest.php`
 
 - [ ] **Test Coverage: Rate Limiting** - Test tier-based limits
   - [ ] Test per-tier rate limits
@@ -141,12 +143,16 @@
 
 ### High Priority
 
-- [ ] **Security: API Key IP Whitelisting** - Restrict key usage
-  - [ ] Add allowed_ips column to api_keys
-  - [ ] Validate request IP against whitelist
-  - [ ] Test with IPv4 and IPv6
-  - [ ] Add CIDR notation support
-  - **Estimated effort:** 3-4 hours
+- [x] **Security: API Key IP Whitelisting** - Restrict key usage
+  - [x] Add allowed_ips column to api_keys
+  - [x] Validate request IP against whitelist
+  - [x] Test with IPv4 and IPv6
+  - [x] Add CIDR notation support
+  - **Completed:** 29 January 2026
+  - **Files:**
+    - `src/Api/Migrations/2026_01_29_000000_add_allowed_ips_to_api_keys_table.php`
+    - `src/Api/Services/IpRestrictionService.php`
+    - `src/Api/Tests/Feature/ApiKeyIpWhitelistTest.php`
 
 - [ ] **Security: Request Signing** - Prevent replay attacks
   - [ ] Implement timestamp validation
@@ -242,5 +248,8 @@
 - [x] **Rate Limiting** - Tier-based rate limits with usage alerts
 - [x] **OpenAPI Documentation** - Auto-generated API docs with Swagger/Scalar/ReDoc
 - [x] **Documentation** - Complete API package documentation
+- [x] **API Key Security Tests** - Comprehensive bcrypt hashing and rotation tests (P1-002)
+- [x] **Webhook System Signature Tests** - HMAC-SHA256 signature verification tests (P1-003)
+- [x] **API Key IP Whitelisting** - allowed_ips column with IPv4/IPv6 and CIDR support (P1-004)
 
 *See `changelog/2026/jan/` for completed features.*
