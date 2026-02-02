@@ -141,8 +141,9 @@ class ApiKey extends Model
         $prefix = $parts[0].'_'.$parts[1]; // hk_xxxxxxxx
         $key = $parts[2];
 
-        // Find potential matches by prefix
-        $candidates = static::where('prefix', $prefix)
+        // Eager load workspace to prevent N+1 queries later
+        $query = static::with('workspace')
+            ->where('prefix', $prefix)
             ->whereNull('deleted_at')
             ->where(function ($query) {
                 $query->whereNull('expires_at')
@@ -152,9 +153,21 @@ class ApiKey extends Model
                 // Exclude keys past their grace period
                 $query->whereNull('grace_period_ends_at')
                     ->orWhere('grace_period_ends_at', '>', now());
-            })
-            ->get();
+            });
 
+        // For legacy SHA-256 keys, we can match the hash directly
+        $sha256Hash = hash('sha256', $key);
+        $query->where(function ($q) use ($sha256Hash) {
+            $q->where('hash_algorithm', self::HASH_BCRYPT)
+                ->orWhere(function ($sub) use ($sha256Hash) {
+                    $sub->where('hash_algorithm', self::HASH_SHA256)
+                        ->where('key', $sha256Hash);
+                });
+        });
+
+        $candidates = $query->get();
+
+        // Verify remaining bcrypt candidates
         foreach ($candidates as $candidate) {
             if ($candidate->verifyKey($key)) {
                 return $candidate;
