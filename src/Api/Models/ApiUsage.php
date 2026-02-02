@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Core\Api\Models;
 
+use Core\Api\Jobs\RecordApiUsageJob;
+use Core\Tenant\Models\Workspace;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Core\Tenant\Models\Workspace;
 
 /**
  * API Usage - individual API request log entry.
@@ -51,20 +52,19 @@ class ApiUsage extends Model
         ?int $responseSize = null,
         ?string $ipAddress = null,
         ?string $userAgent = null
-    ): static {
-        return static::create([
-            'api_key_id' => $apiKeyId,
-            'workspace_id' => $workspaceId,
-            'endpoint' => $endpoint,
-            'method' => strtoupper($method),
-            'status_code' => $statusCode,
-            'response_time_ms' => $responseTimeMs,
-            'request_size' => $requestSize,
-            'response_size' => $responseSize,
-            'ip_address' => $ipAddress,
-            'user_agent' => $userAgent ? substr($userAgent, 0, 500) : null,
-            'created_at' => now(),
-        ]);
+    ): void {
+        RecordApiUsageJob::dispatch(
+            $apiKeyId,
+            $workspaceId,
+            $endpoint,
+            $method,
+            $statusCode,
+            $responseTimeMs,
+            $requestSize,
+            $responseSize,
+            $ipAddress,
+            $userAgent
+        );
     }
 
     /**
