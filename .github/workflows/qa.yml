@@ -77,15 +77,21 @@ jobs:
         id: test
         run: |
           set +e
-          OUTPUT=$(vendor/bin/phpunit --log-junit test-results.xml 2>&1)
+          # Use pest for tests as preferred by the project
+          vendor/bin/pest --log-junit test-results.xml 2>&1
           EXIT_CODE=$?
-          echo "$OUTPUT"
 
-          # Extract test counts
-          TESTS=$(echo "$OUTPUT" | grep -oP '\d+(?= tests)' | head -1 || echo "0")
-          ASSERTIONS=$(echo "$OUTPUT" | grep -oP '\d+(?= assertions)' | head -1 || echo "0")
+          # Extract test counts from JUnit XML (more reliable)
+          if [ -f test-results.xml ]; then
+            # The first match is the total from the root <testsuites> tag
+            TESTS=$(grep -oP 'tests="\K\d+' test-results.xml | head -n 1 || echo "0")
+            ASSERTIONS=$(grep -oP 'assertions="\K\d+' test-results.xml | head -n 1 || echo "0")
+          else
+            TESTS=0
+            ASSERTIONS=0
+          fi
 
-          echo "tests=${TESTS:-0}" >> $GITHUB_OUTPUT
+          echo "tests=${TESTS}" >> $GITHUB_OUTPUT
           echo "assertions=${ASSERTIONS:-0}" >> $GITHUB_OUTPUT
 
           if [ $EXIT_CODE -eq 0 ]; then
