@@ -3,12 +3,6 @@
     "description": "REST API module for Core PHP framework",
     "keywords": ["laravel", "api", "rest", "json"],
     "license": "EUPL-1.2",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/host-uk/core-php"
-        }
-    ],
     "require": {
         "php": "^8.2",
         "host-uk/core": "@dev",
