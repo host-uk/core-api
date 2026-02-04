@@ -8,6 +8,13 @@
         "host-uk/core": "@dev",
         "symfony/yaml": "^7.0"
     },
+    "require-dev": {
+        "pestphp/pest": "^2.34",
+        "phpstan/phpstan": "^1.12",
+        "vimeo/psalm": "^5.20",
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^8.22 || ^9.0"
+    },
     "repositories": [
         {
             "type": "vcs",
