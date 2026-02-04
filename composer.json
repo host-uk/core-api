@@ -5,18 +5,23 @@
     "license": "EUPL-1.2",
     "require": {
         "php": "^8.2",
-        "host-uk/core": "@dev",
+        "host-uk/core": "dev-dev",
+        "host-uk/core-mcp": "dev-dev",
         "symfony/yaml": "^7.0"
     },
     "require-dev": {
         "pestphp/pest": "^3.0",
         "laravel/pint": "^1.18",
-        "orchestra/testbench": "^9.0|^10.0"
+        "orchestra/testbench": "^10.0"
     },
     "repositories": [
         {
             "type": "vcs",
             "url": "https://github.com/host-uk/core-php"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/host-uk/core-mcp"
         }
     ],
     "autoload": {
