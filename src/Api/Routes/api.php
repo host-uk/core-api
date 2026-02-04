@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Core\Api\Controllers\EntitlementApiController;
 use Core\Api\Controllers\McpApiController;
+use Core\Api\Controllers\ProductApiController;
 use Core\Api\Controllers\SeoReportController;
 use Core\Api\Controllers\UnifiedPixelController;
 use Core\Mod\Mcp\Middleware\McpApiKeyAuth;
@@ -65,6 +66,27 @@ Route::middleware('auth')->prefix('entitlements')->group(function () {
     // Get usage summary for a specific workspace (admin)
     Route::get('/summary/{workspace}', [EntitlementApiController::class, 'summary'])
         ->name('api.entitlements.summary.workspace');
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Product API (authenticated)
+// ─────────────────────────────────────────────────────────────────────────────
+
+Route::middleware(['auth', 'api.rate'])->prefix('products')->group(function () {
+    Route::get('/', [ProductApiController::class, 'index'])
+        ->name('api.products.index');
+
+    Route::post('/', [ProductApiController::class, 'store'])
+        ->name('api.products.store');
+
+    Route::get('/{product}', [ProductApiController::class, 'show'])
+        ->name('api.products.show');
+
+    Route::put('/{product}', [ProductApiController::class, 'update'])
+        ->name('api.products.update');
+
+    Route::delete('/{product}', [ProductApiController::class, 'destroy'])
+        ->name('api.products.destroy');
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
