@@ -8,6 +8,12 @@
         "host-uk/core": "@dev",
         "symfony/yaml": "^7.0"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/host-uk/core"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Core\\Api\\": "src/Api/",
@@ -19,6 +25,6 @@
             "providers": []
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }
