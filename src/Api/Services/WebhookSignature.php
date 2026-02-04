@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Core\Api\Services;
 
-use Illuminate\Support\Str;
-
 /**
  * Webhook Signature Service - handles HMAC signing and verification for outbound webhooks.
  *
@@ -75,7 +73,7 @@ class WebhookSignature
      */
     public function generateSecret(): string
     {
-        return Str::random(64);
+        return bin2hex(random_bytes(32));
     }
 
     /**
