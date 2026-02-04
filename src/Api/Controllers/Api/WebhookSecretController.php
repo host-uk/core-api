@@ -22,6 +22,9 @@ class WebhookSecretController extends Controller
 
     /**
      * Rotate a social webhook secret.
+     *
+     * Note: The new secret is only returned once in this response and cannot
+     * be retrieved later. The user must store it securely immediately.
      */
     public function rotateSocialSecret(Request $request, string $uuid): JsonResponse
     {
@@ -55,11 +58,17 @@ class WebhookSecretController extends Controller
                 'secret' => $newSecret,
                 'status' => $this->rotationService->getSecretStatus($webhook->fresh()),
             ],
-        ]);
+        ])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, private')
+            ->header('Pragma', 'no-cache')
+            ->header('X-Sensitive-Response', 'true');
     }
 
     /**
      * Rotate a content webhook endpoint secret.
+     *
+     * Note: The new secret is only returned once in this response and cannot
+     * be retrieved later. The user must store it securely immediately.
      */
     public function rotateContentSecret(Request $request, string $uuid): JsonResponse
     {
@@ -93,7 +102,10 @@ class WebhookSecretController extends Controller
                 'secret' => $newSecret,
                 'status' => $this->rotationService->getSecretStatus($endpoint->fresh()),
             ],
-        ]);
+        ])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, private')
+            ->header('Pragma', 'no-cache')
+            ->header('X-Sensitive-Response', 'true');
     }
 
     /**
