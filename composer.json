@@ -36,6 +36,10 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
-        "github-protocols": ["https"]
+        "github-protocols": ["https"],
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
     }
 }
