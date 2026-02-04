@@ -10,8 +10,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Core\Api\Jobs\UpdateApiKeyLastUsedJob;
 
 /**
  * API Key - authenticates SDK and REST API requests.
@@ -258,10 +260,19 @@ class ApiKey extends Model
 
     /**
      * Record API key usage.
+     *
+     * Uses cache debouncing to reduce database writes. The actual database
+     * update is queued to a background job and only dispatched at most
+     * once every 60 seconds per key.
      */
     public function recordUsage(): void
     {
-        $this->update(['last_used_at' => now()]);
+        $cacheKey = "api_key_last_used:{$this->id}";
+
+        // Only update database at most once per minute
+        if (Cache::add($cacheKey, true, now()->addMinute())) {
+            UpdateApiKeyLastUsedJob::dispatch($this->id);
+        }
     }
 
     /**
