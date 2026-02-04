@@ -87,7 +87,7 @@ Route::middleware('throttle:api')->group(function () {
 ### Based on API Key Tier
 
 ```php
-use Mod\Api\Services\RateLimitService;
+use Core\Api\Services\RateLimitService;
 
 $rateLimitService = app(RateLimitService::class);
 
@@ -146,7 +146,7 @@ X-RateLimit-Reset: 1640995200
 ### Check Current Usage
 
 ```php
-use Mod\Api\Services\RateLimitService;
+use Core\Api\Services\RateLimitService;
 
 $service = app(RateLimitService::class);
 

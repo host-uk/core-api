@@ -44,7 +44,7 @@ return [
 ### Hiding Endpoints
 
 ```php
-use Mod\Api\Documentation\Attributes\ApiHidden;
+use Core\Api\Documentation\Attributes\ApiHidden;
 
 #[ApiHidden]
 class InternalController
@@ -65,7 +65,7 @@ class PostController
 ### Tagging Endpoints
 
 ```php
-use Mod\Api\Documentation\Attributes\ApiTag;
+use Core\Api\Documentation\Attributes\ApiTag;
 
 #[ApiTag('Blog Posts')]
 class PostController
@@ -77,7 +77,7 @@ class PostController
 ### Documenting Parameters
 
 ```php
-use Mod\Api\Documentation\Attributes\ApiParameter;
+use Core\Api\Documentation\Attributes\ApiParameter;
 
 class PostController
 {
@@ -104,7 +104,7 @@ class PostController
 ### Documenting Responses
 
 ```php
-use Mod\Api\Documentation\Attributes\ApiResponse;
+use Core\Api\Documentation\Attributes\ApiResponse;
 
 class PostController
 {
@@ -138,7 +138,7 @@ class PostController
 ### Security Requirements
 
 ```php
-use Mod\Api\Documentation\Attributes\ApiSecurity;
+use Core\Api\Documentation\Attributes\ApiSecurity;
 
 #[ApiSecurity(['apiKey' => []])]
 class PostController
@@ -210,7 +210,7 @@ return [
 
 namespace Mod\Blog\Api\Documentation;
 
-use Mod\Api\Documentation\Extension;
+use Core\Api\Documentation\Extension;
 
 class BlogExtension extends Extension
 {
@@ -248,7 +248,7 @@ public function onApiRoutes(ApiRoutesRegistering $event): void
 **Rate Limit Extension:**
 
 ```php
-use Mod\Api\Documentation\Extensions\RateLimitExtension;
+use Core\Api\Documentation\Extensions\RateLimitExtension;
 
 // Automatically documents rate limits in responses
 // Adds X-RateLimit-* headers to all endpoints
@@ -257,7 +257,7 @@ use Mod\Api\Documentation\Extensions\RateLimitExtension;
 **Workspace Header Extension:**
 
 ```php
-use Mod\Api\Documentation\Extensions\WorkspaceHeaderExtension;
+use Core\Api\Documentation\Extensions\WorkspaceHeaderExtension;
 
 // Documents X-Workspace-ID header requirement
 // Adds to all workspace-scoped endpoints
@@ -268,7 +268,7 @@ use Mod\Api\Documentation\Extensions\WorkspaceHeaderExtension;
 ### Pagination
 
 ```php
-use Mod\Api\Documentation\Examples\CommonExamples;
+use Core\Api\Documentation\Examples\CommonExamples;
 
 #[ApiResponse(
     status: 200,

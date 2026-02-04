@@ -91,8 +91,8 @@ Build controllers that use the `HasApiResponses` trait for consistent error hand
 namespace Mod\Blog\Api;
 
 use App\Http\Controllers\Controller;
-use Core\Mod\Api\Concerns\HasApiResponses;
-use Core\Mod\Api\Resources\PaginatedCollection;
+use Core\Core\Api\Concerns\HasApiResponses;
+use Core\Core\Api\Resources\PaginatedCollection;
 use Illuminate\Http\Request;
 use Mod\Blog\Models\Post;
 use Mod\Blog\Resources\PostResource;
@@ -162,7 +162,7 @@ class PostController extends Controller
 The `PaginatedCollection` class provides standardized pagination metadata:
 
 ```php
-use Core\Mod\Api\Resources\PaginatedCollection;
+use Core\Core\Api\Resources\PaginatedCollection;
 
 public function index(Request $request)
 {
@@ -618,10 +618,10 @@ new_post = response.json()
 Use attributes to auto-generate OpenAPI documentation:
 
 ```php
-use Core\Mod\Api\Documentation\Attributes\ApiTag;
-use Core\Mod\Api\Documentation\Attributes\ApiParameter;
-use Core\Mod\Api\Documentation\Attributes\ApiResponse;
-use Core\Mod\Api\Documentation\Attributes\ApiSecurity;
+use Core\Core\Api\Documentation\Attributes\ApiTag;
+use Core\Core\Api\Documentation\Attributes\ApiParameter;
+use Core\Core\Api\Documentation\Attributes\ApiResponse;
+use Core\Core\Api\Documentation\Attributes\ApiSecurity;
 
 #[ApiTag('Posts', 'Blog post management')]
 #[ApiSecurity('api_key')]
@@ -661,7 +661,7 @@ class PostController extends Controller
 Use the `HasApiResponses` trait for consistent errors:
 
 ```php
-use Core\Mod\Api\Concerns\HasApiResponses;
+use Core\Core\Api\Concerns\HasApiResponses;
 
 class PostController extends Controller
 {
@@ -812,7 +812,7 @@ public function index(Request $request)
 namespace Tests\Feature\Api;
 
 use Tests\TestCase;
-use Mod\Api\Models\ApiKey;
+use Core\Api\Models\ApiKey;
 use Mod\Blog\Models\Post;
 
 class PostApiTest extends TestCase

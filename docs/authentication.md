@@ -7,7 +7,7 @@ The API package provides secure authentication with bcrypt-hashed API keys, scop
 ### Creating Keys
 
 ```php
-use Mod\Api\Models\ApiKey;
+use Core\Api\Models\ApiKey;
 
 $apiKey = ApiKey::create([
     'name' => 'Mobile App Production',
@@ -262,7 +262,7 @@ Route::middleware('auth:api')->group(function () {
 ### Scope Enforcement
 
 ```php
-use Mod\Api\Middleware\EnforceApiScope;
+use Core\Api\Middleware\EnforceApiScope;
 
 Route::middleware([EnforceApiScope::class.':posts:write'])
     ->post('/posts', [PostController::class, 'store']);
@@ -271,7 +271,7 @@ Route::middleware([EnforceApiScope::class.':posts:write'])
 ### Rate Limiting
 
 ```php
-use Mod\Api\Middleware\RateLimitApi;
+use Core\Api\Middleware\RateLimitApi;
 
 Route::middleware(RateLimitApi::class)->group(function () {
     // Rate-limited routes
@@ -342,7 +342,7 @@ if ($usage > $threshold) {
 namespace Tests\Feature\Api;
 
 use Tests\TestCase;
-use Mod\Api\Models\ApiKey;
+use Core\Api\Models\ApiKey;
 
 class ApiKeyAuthTest extends TestCase
 {

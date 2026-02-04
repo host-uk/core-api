@@ -77,7 +77,7 @@ jobs:
         id: test
         run: |
           set +e
-          OUTPUT=$(vendor/bin/phpunit --log-junit test-results.xml 2>&1)
+          OUTPUT=$(vendor/bin/pest --log-junit test-results.xml 2>&1)
           EXIT_CODE=$?
           echo "$OUTPUT"
 
