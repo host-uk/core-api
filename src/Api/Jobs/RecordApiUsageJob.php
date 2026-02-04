@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Core\Api\Jobs;
+namespace Mod\Api\Jobs;
 
-use Core\Api\Models\ApiUsage;
-use Core\Api\Models\ApiUsageDaily;
+use Mod\Api\Models\ApiUsage;
+use Mod\Api\Models\ApiUsageDaily;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
