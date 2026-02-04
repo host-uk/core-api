@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Mod\Api\Tests\Feature;
+namespace Core\Api\Tests\Feature;
 
-use Mod\Api\Models\ApiKey;
-use Mod\Api\Models\ApiUsage;
-use Mod\Api\Models\ApiUsageDaily;
+use Core\Api\Models\ApiKey;
+use Core\Api\Models\ApiUsage;
+use Core\Api\Models\ApiUsageDaily;
 use Mod\Tenant\Models\User;
 use Mod\Tenant\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
