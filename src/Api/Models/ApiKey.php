@@ -142,17 +142,10 @@ class ApiKey extends Model
         $key = $parts[2];
 
         // Find potential matches by prefix
+        // We limit to 10 candidates to prevent unbounded memory usage and CPU-intensive bcrypt checks
         $candidates = static::where('prefix', $prefix)
-            ->whereNull('deleted_at')
-            ->where(function ($query) {
-                $query->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
-            })
-            ->where(function ($query) {
-                // Exclude keys past their grace period
-                $query->whereNull('grace_period_ends_at')
-                    ->orWhere('grace_period_ends_at', '>', now());
-            })
+            ->active()
+            ->limit(10)
             ->get();
 
         foreach ($candidates as $candidate) {
