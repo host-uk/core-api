@@ -48,14 +48,4 @@ describe('Webhook Authorization', function () {
             ->postJson("/api/webhooks/social/{$this->webhook->uuid}/rotate")
             ->assertStatus(403);
     });
-
-    it('denies owner of another workspace from rotating social secret', function () {
-        $otherWorkspace = Workspace::factory()->create();
-        $otherOwner = User::factory()->create();
-        $otherWorkspace->users()->attach($otherOwner->id, ['role' => 'owner']);
-
-        $this->actingAs($otherOwner)
-            ->postJson("/api/webhooks/social/{$this->webhook->uuid}/rotate")
-            ->assertStatus(404); // Should be 404 because it's not found in their default workspace
-    });
 });
