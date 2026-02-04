@@ -8,6 +8,15 @@
         "host-uk/core": "@dev",
         "symfony/yaml": "^7.0"
     },
+    "require-dev": {
+        "pestphp/pest": "^2.34",
+        "pestphp/pest-plugin-laravel": "^2.3",
+        "phpstan/phpstan": "^1.10",
+        "vimeo/psalm": "^5.22",
+        "laravel/pint": "^1.13",
+        "phpunit/phpunit": "^10.5",
+        "orchestra/testbench": "^9.0"
+    },
     "repositories": [
         {
             "type": "vcs",
@@ -24,6 +33,11 @@
     "extra": {
         "laravel": {
             "providers": []
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
         }
     },
     "minimum-stability": "dev",
