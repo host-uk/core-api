@@ -12,9 +12,13 @@ use Core\Api\RateLimit\RateLimitService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Core\Social\Models\Webhook;
+use Core\Content\Models\ContentWebhookEndpoint;
+use Core\Api\Policies\WebhookPolicy;
 
 /**
  * API Module Boot.
@@ -74,6 +78,10 @@ class Boot extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__.'/Migrations');
         $this->configureRateLimiting();
+
+        // Register Webhook policies
+        Gate::policy(Webhook::class, WebhookPolicy::class);
+        Gate::policy(ContentWebhookEndpoint::class, WebhookPolicy::class);
     }
 
     /**
