@@ -5,13 +5,13 @@
     "license": "EUPL-1.2",
     "require": {
         "php": "^8.2",
-        "host-uk/core": "@dev",
+        "host-uk/core": "dev-main",
         "symfony/yaml": "^7.0"
     },
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/host-uk/core"
+            "url": "https://github.com/host-uk/core-php"
         }
     ],
     "autoload": {
