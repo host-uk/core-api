@@ -28,6 +28,8 @@ class WebhookDelivery extends Model
 
     public const STATUS_RETRYING = 'retrying';
 
+    public const STATUS_PROCESSING = 'processing';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public const MAX_RETRIES = 5;
@@ -53,12 +55,14 @@ class WebhookDelivery extends Model
         'attempt',
         'status',
         'delivered_at',
+        'processed_at',
         'next_retry_at',
     ];
 
     protected $casts = [
         'payload' => 'array',
         'delivered_at' => 'datetime',
+        'processed_at' => 'datetime',
         'next_retry_at' => 'datetime',
     ];
 
@@ -203,6 +207,11 @@ class WebhookDelivery extends Model
                 ->orWhere(function ($q2) {
                     $q2->where('status', self::STATUS_RETRYING)
                         ->where('next_retry_at', '<=', now());
+                })
+                ->orWhere(function ($q3) {
+                    // Stalled processing jobs (older than 5 minutes)
+                    $q3->where('status', self::STATUS_PROCESSING)
+                        ->where('processed_at', '<=', now()->subMinutes(5));
                 });
         });
     }
