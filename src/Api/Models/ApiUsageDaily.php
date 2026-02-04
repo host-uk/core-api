@@ -50,6 +50,7 @@ class ApiUsageDaily extends Model
         $isSuccess = $usage->isSuccess();
         $isError = $usage->status_code >= 400;
         $date = $usage->created_at->toDateString();
+        $responseTimeMs = (int) $usage->response_time_ms;
         $now = now();
 
         // Unique key for this daily aggregation
@@ -61,7 +62,8 @@ class ApiUsageDaily extends Model
             'method' => $usage->method,
         ];
 
-        // First, ensure the record exists with upsert (database-portable)
+        // Ensure the record exists with upsert (database-portable).
+        // If it exists, we only touch updated_at to satisfy the upsert.
         static::upsert(
             [
                 ...$uniqueKey,
@@ -77,40 +79,32 @@ class ApiUsageDaily extends Model
                 'updated_at' => $now,
             ],
             ['api_key_id', 'workspace_id', 'date', 'endpoint', 'method'],
-            ['updated_at'] // Only touch updated_at if record exists
+            ['updated_at']
         );
 
-        // Then atomically increment counters using query builder
-        $query = static::where($uniqueKey);
-
-        // Build raw update for atomic increments
-        $query->update([
+        // Combined update for all metrics in a single query.
+        // Uses CASE statements for conditional min/max updates to maintain portability.
+        static::where($uniqueKey)->update([
             'request_count' => DB::raw('request_count + 1'),
             'success_count' => DB::raw('success_count + '.($isSuccess ? 1 : 0)),
             'error_count' => DB::raw('error_count + '.($isError ? 1 : 0)),
-            'total_response_time_ms' => DB::raw('total_response_time_ms + '.(int) $usage->response_time_ms),
+            'total_response_time_ms' => DB::raw('total_response_time_ms + '.$responseTimeMs),
             'total_request_size' => DB::raw('total_request_size + '.(int) ($usage->request_size ?? 0)),
             'total_response_size' => DB::raw('total_response_size + '.(int) ($usage->response_size ?? 0)),
+            'min_response_time_ms' => DB::raw("CASE
+                WHEN min_response_time_ms IS NULL OR min_response_time_ms > {$responseTimeMs}
+                THEN {$responseTimeMs}
+                ELSE min_response_time_ms
+            END"),
+            'max_response_time_ms' => DB::raw("CASE
+                WHEN max_response_time_ms IS NULL OR max_response_time_ms < {$responseTimeMs}
+                THEN {$responseTimeMs}
+                ELSE max_response_time_ms
+            END"),
             'updated_at' => $now,
         ]);
 
-        // Update min/max response times (these need conditional logic)
-        $responseTimeMs = (int) $usage->response_time_ms;
-        static::where($uniqueKey)
-            ->where(function ($q) use ($responseTimeMs) {
-                $q->whereNull('min_response_time_ms')
-                    ->orWhere('min_response_time_ms', '>', $responseTimeMs);
-            })
-            ->update(['min_response_time_ms' => $responseTimeMs]);
-
-        static::where($uniqueKey)
-            ->where(function ($q) use ($responseTimeMs) {
-                $q->whereNull('max_response_time_ms')
-                    ->orWhere('max_response_time_ms', '<', $responseTimeMs);
-            })
-            ->update(['max_response_time_ms' => $responseTimeMs]);
-
-        // Retrieve the record for return
+        // Retrieve the final record for return
         return static::where($uniqueKey)->first();
     }
 

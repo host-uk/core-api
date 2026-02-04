@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mod\Api\Services;
 
 use Carbon\Carbon;
+use Mod\Api\Jobs\RecordApiUsageJob;
 use Mod\Api\Models\ApiUsage;
 use Mod\Api\Models\ApiUsageDaily;
 
@@ -47,8 +48,10 @@ class ApiUsageService
             $userAgent
         );
 
-        // Update daily aggregation
-        ApiUsageDaily::recordFromUsage($usage);
+        // Update daily aggregation (offloaded to background job for performance)
+        if (config('api.usage.enabled', true)) {
+            RecordApiUsageJob::dispatch($usage);
+        }
 
         return $usage;
     }
