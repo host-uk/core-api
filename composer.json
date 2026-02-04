@@ -5,9 +5,15 @@
     "license": "EUPL-1.2",
     "require": {
         "php": "^8.2",
-        "host-uk/core": "@dev",
+        "host-uk/core": "dev-dev",
         "symfony/yaml": "^7.0"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/host-uk/core-php.git"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Core\\Api\\": "src/Api/",
@@ -20,5 +26,8 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "github-protocols": ["https"]
+    }
 }

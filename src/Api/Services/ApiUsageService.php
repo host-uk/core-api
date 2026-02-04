@@ -43,7 +43,6 @@ class ApiUsageService
             'endpoint' => $normalisedEndpoint,
             'method' => $method,
             'status_code' => $statusCode,
-            'responseTimeMs' => $responseTimeMs, // Wait, job uses response_time_ms
             'response_time_ms' => $responseTimeMs,
             'request_size' => $requestSize,
             'response_size' => $responseSize,
