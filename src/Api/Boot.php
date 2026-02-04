@@ -57,6 +57,7 @@ class Boot extends ServiceProvider
         });
 
         // Register webhook services
+        $this->app->singleton(Services\WebhookUrlValidator::class);
         $this->app->singleton(Services\WebhookTemplateService::class);
         $this->app->singleton(Services\WebhookSecretRotationService::class);
 

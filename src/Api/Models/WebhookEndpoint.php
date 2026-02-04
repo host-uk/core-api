@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Core\Api\Models;
 
 use Core\Api\Services\WebhookSignature;
+use Core\Api\Services\WebhookUrlValidator;
 use Core\Tenant\Models\Workspace;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -105,6 +106,11 @@ class WebhookEndpoint extends Model
         array $events,
         ?string $description = null
     ): static {
+        $validator = app(WebhookUrlValidator::class);
+        if (! $validator->validate($url)) {
+            throw new \InvalidArgumentException('Invalid or restricted webhook URL.');
+        }
+
         $signatureService = app(WebhookSignature::class);
 
         return static::create([
@@ -231,6 +237,20 @@ class WebhookEndpoint extends Model
         $this->update(['secret' => $newSecret]);
 
         return $newSecret;
+    }
+
+    /**
+     * Set the webhook URL with validation.
+     */
+    public function setUrlAttribute(string $value): void
+    {
+        $validator = app(WebhookUrlValidator::class);
+
+        if (! $validator->validate($value)) {
+            throw new \InvalidArgumentException('Invalid or restricted webhook URL.');
+        }
+
+        $this->attributes['url'] = $value;
     }
 
     // Relationships
