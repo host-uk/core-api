@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Core\Api\Jobs;
 
 use Core\Api\Models\WebhookDelivery;
+use Core\Api\Services\WebhookUrlValidator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -76,6 +77,27 @@ class DeliverWebhookJob implements ShouldQueue
         // Get delivery payload with signature headers
         $deliveryPayload = $this->delivery->getDeliveryPayload();
         $timeout = config('api.webhooks.timeout', 30);
+
+        // Final SSRF validation before delivery
+        $validator = app(WebhookUrlValidator::class);
+        if (! $validator->validate($endpoint->url)) {
+            Log::error('Webhook delivery cancelled - restricted URL detected', [
+                'delivery_id' => $this->delivery->id,
+                'endpoint_id' => $endpoint->id,
+                'url' => $endpoint->url,
+            ]);
+
+            $this->delivery->update([
+                'status' => WebhookDelivery::STATUS_FAILED,
+                'response_code' => 0,
+                'response_body' => 'Restricted URL blocked for security reasons.',
+                'attempt' => WebhookDelivery::MAX_RETRIES, // No further retries
+            ]);
+
+            $endpoint->recordFailure();
+
+            return;
+        }
 
         Log::info('Attempting webhook delivery', [
             'delivery_id' => $this->delivery->id,
