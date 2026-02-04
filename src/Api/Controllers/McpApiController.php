@@ -14,6 +14,8 @@ use Core\Mod\Mcp\Services\ToolVersionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -444,6 +446,9 @@ class McpApiController extends Controller
             throw new \RuntimeException("Unknown server: {$server}");
         }
 
+        // Add timeout from configuration
+        $timeout = config('api.mcp.execution_timeout', 30);
+
         // Build MCP request
         $mcpRequest = [
             'jsonrpc' => '2.0',
@@ -471,14 +476,67 @@ class McpApiController extends Controller
             throw new \RuntimeException('Failed to start MCP server process');
         }
 
+        // Write request to stdin
         fwrite($pipes[0], json_encode($mcpRequest)."\n");
         fclose($pipes[0]);
 
-        $output = stream_get_contents($pipes[1]);
+        // Set non-blocking and use stream_select for timeout and size limits
+        stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
+
+        $output = '';
+        $errorOutput = '';
+        $startTime = time();
+
+        while (true) {
+            $read = [$pipes[1], $pipes[2]];
+            $write = $except = null;
+
+            if (stream_select($read, $write, $except, 1) === false) {
+                break;
+            }
+
+            if (time() - $startTime > $timeout) {
+                proc_terminate($process);
+                throw new \RuntimeException('MCP server execution timed out');
+            }
+
+            // Read with size limits
+            $output .= fread($pipes[1], 1024 * 1024);
+            $errorOutput .= fread($pipes[2], 1024 * 64);
+
+            if (strlen($output) > 10 * 1024 * 1024) { // 10MB absolute max
+                proc_terminate($process);
+                throw new \RuntimeException('Output size limit exceeded');
+            }
+
+            if (strlen($errorOutput) > 1024 * 1024) { // 1MB max for stderr
+                proc_terminate($process);
+                throw new \RuntimeException('Error output size limit exceeded');
+            }
+
+            // Check if process is still running
+            $status = proc_get_status($process);
+            if (! $status['running']) {
+                // Read remaining output
+                $output .= stream_get_contents($pipes[1]);
+                $errorOutput .= stream_get_contents($pipes[2]);
+                break;
+            }
+        }
+
         fclose($pipes[1]);
         fclose($pipes[2]);
-
         proc_close($process);
+
+        // Log stderr for debugging (sanitized)
+        if (! empty($errorOutput)) {
+            Log::warning('MCP server stderr output', [
+                'server' => $server,
+                'tool' => $tool,
+                'error' => Str::limit($errorOutput, 1000),
+            ]);
+        }
 
         $response = json_decode($output, true);
 
