@@ -496,7 +496,7 @@ class McpApiController extends Controller
     {
         // Similar to executeToolViaArtisan but with resources/read method
         // Simplified for now - can expand later
-        return ['path' => $path, 'content' => 'Resource reading not yet implemented'];
+        abort(501, 'Resource reading not yet implemented');
     }
 
     /**

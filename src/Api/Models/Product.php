@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Api\Models;
 
+use Core\Api\Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -33,6 +34,14 @@ class Product extends Model
         'price' => 'integer', // Stored in cents/pence
         'metadata' => 'array',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): ProductFactory
+    {
+        return ProductFactory::new();
+    }
 
     /**
      * Get the formatted price with currency.
