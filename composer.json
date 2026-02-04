@@ -8,6 +8,12 @@
         "host-uk/core": "@dev",
         "symfony/yaml": "^7.0"
     },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/host-uk/core-php.git"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Core\\Api\\": "src/Api/",

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Api\Controllers\Api;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -16,6 +17,8 @@ use Core\Social\Models\Webhook;
  */
 class WebhookSecretController extends Controller
 {
+    use AuthorizesRequests;
+
     public function __construct(
         protected WebhookSecretRotationService $rotationService
     ) {}
@@ -38,6 +41,8 @@ class WebhookSecretController extends Controller
         if (! $webhook) {
             return response()->json(['error' => 'Webhook not found'], 404);
         }
+
+        $this->authorize('update', $webhook);
 
         $validated = $request->validate([
             'grace_period_seconds' => 'nullable|integer|min:300|max:604800', // 5 min to 7 days
@@ -77,6 +82,8 @@ class WebhookSecretController extends Controller
             return response()->json(['error' => 'Webhook endpoint not found'], 404);
         }
 
+        $this->authorize('update', $endpoint);
+
         $validated = $request->validate([
             'grace_period_seconds' => 'nullable|integer|min:300|max:604800',
         ]);
@@ -115,6 +122,8 @@ class WebhookSecretController extends Controller
             return response()->json(['error' => 'Webhook not found'], 404);
         }
 
+        $this->authorize('update', $webhook);
+
         return response()->json([
             'data' => $this->rotationService->getSecretStatus($webhook),
         ]);
@@ -139,6 +148,8 @@ class WebhookSecretController extends Controller
             return response()->json(['error' => 'Webhook endpoint not found'], 404);
         }
 
+        $this->authorize('update', $endpoint);
+
         return response()->json([
             'data' => $this->rotationService->getSecretStatus($endpoint),
         ]);
@@ -162,6 +173,8 @@ class WebhookSecretController extends Controller
         if (! $webhook) {
             return response()->json(['error' => 'Webhook not found'], 404);
         }
+
+        $this->authorize('update', $webhook);
 
         $this->rotationService->invalidatePreviousSecret($webhook);
 
@@ -190,6 +203,8 @@ class WebhookSecretController extends Controller
             return response()->json(['error' => 'Webhook endpoint not found'], 404);
         }
 
+        $this->authorize('update', $endpoint);
+
         $this->rotationService->invalidatePreviousSecret($endpoint);
 
         return response()->json([
@@ -216,6 +231,8 @@ class WebhookSecretController extends Controller
         if (! $webhook) {
             return response()->json(['error' => 'Webhook not found'], 404);
         }
+
+        $this->authorize('update', $webhook);
 
         $validated = $request->validate([
             'grace_period_seconds' => 'required|integer|min:300|max:604800',
@@ -250,6 +267,8 @@ class WebhookSecretController extends Controller
         if (! $endpoint) {
             return response()->json(['error' => 'Webhook endpoint not found'], 404);
         }
+
+        $this->authorize('update', $endpoint);
 
         $validated = $request->validate([
             'grace_period_seconds' => 'required|integer|min:300|max:604800',
