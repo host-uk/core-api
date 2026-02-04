@@ -5,13 +5,26 @@
     "license": "EUPL-1.2",
     "require": {
         "php": "^8.2",
-        "host-uk/core": "@dev",
+        "laravel/framework": "^12.0",
         "symfony/yaml": "^7.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "mockery/mockery": "^1.6",
+        "laravel/pint": "^1.13"
     },
     "autoload": {
         "psr-4": {
+            "Core\\": "src/Core/",
             "Core\\Api\\": "src/Api/",
             "Core\\Website\\Api\\": "src/Website/Api/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/",
+            "Database\\Factories\\": "database/factories/"
         }
     },
     "extra": {
@@ -20,5 +33,10 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
 }
