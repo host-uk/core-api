@@ -14,6 +14,9 @@ use Core\Mod\Mcp\Services\ToolVersionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -593,7 +596,36 @@ class McpApiController extends Controller
         return Cache::remember('mcp:registry', 600, function () {
             $path = resource_path('mcp/registry.yaml');
 
-            return file_exists($path) ? Yaml::parseFile($path) : ['servers' => []];
+            if (! file_exists($path)) {
+                return ['servers' => []];
+            }
+
+            try {
+                $data = $this->parseYamlFile($path);
+
+                if (! is_array($data)) {
+                    Log::error("MCP registry file at {$path} is not a valid YAML array");
+
+                    return ['servers' => []];
+                }
+
+                $validator = Validator::make($data, [
+                    'servers' => 'required|array',
+                    'servers.*.id' => 'required|string',
+                ]);
+
+                if ($validator->fails()) {
+                    Log::error("MCP registry validation failed for {$path}: ".implode(', ', $validator->errors()->all()));
+
+                    return ['servers' => []];
+                }
+
+                return $data;
+            } catch (ParseException $e) {
+                Log::error("Failed to parse MCP registry YAML at {$path}: ".$e->getMessage());
+
+                return ['servers' => []];
+            }
         });
     }
 
@@ -602,8 +634,49 @@ class McpApiController extends Controller
         return Cache::remember("mcp:server:{$id}", 600, function () use ($id) {
             $path = resource_path("mcp/servers/{$id}.yaml");
 
-            return file_exists($path) ? Yaml::parseFile($path) : null;
+            if (! file_exists($path)) {
+                return null;
+            }
+
+            try {
+                $data = $this->parseYamlFile($path);
+
+                if (! is_array($data)) {
+                    Log::error("MCP server file at {$path} is not a valid YAML array");
+
+                    return null;
+                }
+
+                $validator = Validator::make($data, [
+                    'id' => 'required|string',
+                    'name' => 'required|string',
+                    'tools' => 'nullable|array',
+                    'resources' => 'nullable|array',
+                ]);
+
+                if ($validator->fails()) {
+                    Log::error("MCP server validation failed for {$path}: ".implode(', ', $validator->errors()->all()));
+
+                    return null;
+                }
+
+                return $data;
+            } catch (ParseException $e) {
+                Log::error("Failed to parse MCP server YAML at {$path}: ".$e->getMessage());
+
+                return null;
+            }
         });
+    }
+
+    /**
+     * Parse a YAML file.
+     *
+     * @throws ParseException
+     */
+    protected function parseYamlFile(string $path): mixed
+    {
+        return Yaml::parseFile($path);
     }
 
     protected function loadServerSummary(string $id): ?array
