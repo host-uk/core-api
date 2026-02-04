@@ -10,7 +10,7 @@
     },
     "repositories": [
         {
-            "type": "github",
+            "type": "vcs",
             "url": "https://github.com/host-uk/core"
         }
     ],
@@ -25,6 +25,6 @@
             "providers": []
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }
