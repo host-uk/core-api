@@ -8,6 +8,15 @@
         "host-uk/core": "@dev",
         "symfony/yaml": "^7.0"
     },
+    "require-dev": {
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "laravel/pint": "^1.13",
+        "phpstan/phpstan": "^1.10",
+        "vimeo/psalm": "^5.15",
+        "phpunit/phpunit": "^11.0",
+        "mockery/mockery": "^1.6"
+    },
     "autoload": {
         "psr-4": {
             "Core\\Api\\": "src/Api/",
@@ -20,5 +29,11 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/host-uk/core-php"
+        }
+    ]
 }
