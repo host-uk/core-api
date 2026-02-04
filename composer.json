@@ -8,9 +8,25 @@
         "host-uk/core": "@dev",
         "symfony/yaml": "^7.0"
     },
+    "require-dev": {
+        "pestphp/pest": "^2.34",
+        "pestphp/pest-plugin-laravel": "^2.3",
+        "phpstan/phpstan": "^1.10",
+        "vimeo/psalm": "^5.22",
+        "laravel/pint": "^1.13",
+        "phpunit/phpunit": "^10.5",
+        "orchestra/testbench": "^9.0"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/host-uk/core-php.git"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Core\\Api\\": "src/Api/",
+            "Mod\\Api\\": "src/Api/",
             "Core\\Website\\Api\\": "src/Website/Api/"
         }
     },
@@ -19,6 +35,11 @@
             "providers": []
         }
     },
-    "minimum-stability": "stable",
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
     "prefer-stable": true
 }

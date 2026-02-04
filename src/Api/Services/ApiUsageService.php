@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Mod\Api\Services;
 
 use Carbon\Carbon;
-use Mod\Api\Models\ApiUsage;
-use Mod\Api\Models\ApiUsageDaily;
+use Mod\Api\Jobs\RecordApiUsageJob;
+use Core\Api\Models\ApiUsage;
+use Core\Api\Models\ApiUsageDaily;
 
 /**
  * API Usage Service - tracks and reports API usage metrics.
@@ -47,8 +48,10 @@ class ApiUsageService
             $userAgent
         );
 
-        // Update daily aggregation
-        ApiUsageDaily::recordFromUsage($usage);
+        // Update daily aggregation (offloaded to background job for performance)
+        if (config('api.usage.enabled', true)) {
+            RecordApiUsageJob::dispatch($usage);
+        }
 
         return $usage;
     }
@@ -282,7 +285,7 @@ class ApiUsageService
 
         // Fetch API keys separately to avoid broken eager loading with aggregation
         $apiKeyIds = $aggregated->pluck('api_key_id')->filter()->unique()->all();
-        $apiKeys = \Mod\Api\Models\ApiKey::whereIn('id', $apiKeyIds)
+        $apiKeys = \Core\Api\Models\ApiKey::whereIn('id', $apiKeyIds)
             ->select('id', 'name', 'prefix')
             ->get()
             ->keyBy('id');

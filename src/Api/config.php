@@ -222,6 +222,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Usage Tracking
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for API usage tracking and aggregation.
+    |
+    */
+
+    'usage' => [
+        // Enable/disable usage tracking
+        'enabled' => env('API_USAGE_TRACKING_ENABLED', true),
+
+        // Queue used for background usage recording
+        'queue' => env('API_USAGE_QUEUE', 'default'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Pagination
     |--------------------------------------------------------------------------
     |
