@@ -79,7 +79,7 @@ describe('Tool Execution', function () {
     });
 
     it('returns 422 for schema validation failures', function () {
-        $response = $this->postJson('/api/mcp/tools/call', [
+        $response = $this->postJson('/api/v1/mcp/tools/call', [
             'server' => $this->mockServerId,
             'tool' => 'test-tool',
             'arguments' => [], // Missing required arg1
