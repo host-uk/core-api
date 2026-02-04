@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -43,11 +44,18 @@ class DeliverWebhookJob implements ShouldQueue
     public int $tries = 1;
 
     /**
+     * The attempt number this job is intended for.
+     */
+    public int $attemptNumber;
+
+    /**
      * Create a new job instance.
      */
     public function __construct(
         public WebhookDelivery $delivery
     ) {
+        $this->attemptNumber = $delivery->attempt;
+
         // Use dedicated webhook queue if configured
         $this->queue = config('api.webhooks.queue', 'default');
 
@@ -62,6 +70,61 @@ class DeliverWebhookJob implements ShouldQueue
      */
     public function handle(): void
     {
+        // 1. Idempotency check and mark as processing
+        $shouldProceed = DB::transaction(function () {
+            $delivery = WebhookDelivery::query()
+                ->where('id', $this->delivery->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $delivery) {
+                return false;
+            }
+
+            // If attempt number has changed, this is a stale job
+            if ($delivery->attempt !== $this->attemptNumber) {
+                Log::info('Webhook delivery skipped - attempt mismatch', [
+                    'delivery_id' => $delivery->id,
+                    'job_attempt' => $this->attemptNumber,
+                    'current_attempt' => $delivery->attempt,
+                ]);
+
+                return false;
+            }
+
+            // If already successful, skip
+            if ($delivery->status === WebhookDelivery::STATUS_SUCCESS) {
+                return false;
+            }
+
+            // If already processing by another worker (and not stalled), skip
+            if ($delivery->status === WebhookDelivery::STATUS_PROCESSING) {
+                $isStalled = $delivery->processed_at && $delivery->processed_at->isBefore(now()->subMinutes(5));
+                if (! $isStalled) {
+                    return false;
+                }
+                Log::warning('Webhook delivery re-taking stalled processing job', [
+                    'delivery_id' => $delivery->id,
+                    'last_processed_at' => $delivery->processed_at,
+                ]);
+            }
+
+            // Mark as processing
+            $delivery->update([
+                'status' => WebhookDelivery::STATUS_PROCESSING,
+                'processed_at' => now(),
+            ]);
+
+            return true;
+        });
+
+        if (! $shouldProceed) {
+            return;
+        }
+
+        // Refresh model to get latest data including endpoint relation
+        $this->delivery->refresh();
+
         // Don't deliver if endpoint is disabled
         $endpoint = $this->delivery->endpoint;
         if (! $endpoint || ! $endpoint->shouldReceive($this->delivery->event_type)) {
@@ -95,12 +158,23 @@ class DeliverWebhookJob implements ShouldQueue
 
             // Success is any 2xx status code
             if ($response->successful()) {
-                $this->delivery->markSuccess($statusCode, $responseBody);
+                DB::transaction(function () use ($statusCode, $responseBody) {
+                    $delivery = WebhookDelivery::query()
+                        ->where('id', $this->delivery->id)
+                        ->lockForUpdate()
+                        ->first();
 
-                Log::info('Webhook delivered successfully', [
-                    'delivery_id' => $this->delivery->id,
-                    'status_code' => $statusCode,
-                ]);
+                    if (! $delivery || $delivery->attempt !== $this->attemptNumber) {
+                        return;
+                    }
+
+                    $delivery->markSuccess($statusCode, $responseBody);
+
+                    Log::info('Webhook delivered successfully', [
+                        'delivery_id' => $delivery->id,
+                        'status_code' => $statusCode,
+                    ]);
+                });
 
                 return;
             }
@@ -129,30 +203,41 @@ class DeliverWebhookJob implements ShouldQueue
      */
     protected function handleFailure(int $statusCode, ?string $responseBody): void
     {
-        Log::warning('Webhook delivery failed', [
-            'delivery_id' => $this->delivery->id,
-            'attempt' => $this->delivery->attempt,
-            'status_code' => $statusCode,
-            'can_retry' => $this->delivery->canRetry(),
-        ]);
+        DB::transaction(function () use ($statusCode, $responseBody) {
+            $delivery = WebhookDelivery::query()
+                ->where('id', $this->delivery->id)
+                ->lockForUpdate()
+                ->first();
 
-        // Mark as failed (this also schedules retry if attempts remain)
-        $this->delivery->markFailed($statusCode, $responseBody);
+            if (! $delivery || $delivery->attempt !== $this->attemptNumber) {
+                return;
+            }
 
-        // If we can retry, dispatch a new job with the appropriate delay
-        if ($this->delivery->canRetry() && $this->delivery->next_retry_at) {
-            $delay = $this->delivery->next_retry_at->diffInSeconds(now());
-
-            Log::info('Scheduling webhook retry', [
-                'delivery_id' => $this->delivery->id,
-                'next_attempt' => $this->delivery->attempt,
-                'delay_seconds' => $delay,
-                'next_retry_at' => $this->delivery->next_retry_at->toIso8601String(),
+            Log::warning('Webhook delivery failed', [
+                'delivery_id' => $delivery->id,
+                'attempt' => $delivery->attempt,
+                'status_code' => $statusCode,
+                'can_retry' => $delivery->canRetry(),
             ]);
 
-            // Dispatch retry with calculated delay
-            self::dispatch($this->delivery->fresh())->delay($delay);
-        }
+            // Mark as failed (this also schedules retry if attempts remain)
+            $delivery->markFailed($statusCode, $responseBody);
+
+            // If we can retry, dispatch a new job with the appropriate delay
+            if ($delivery->canRetry() && $delivery->next_retry_at) {
+                $delay = $delivery->next_retry_at->diffInSeconds(now());
+
+                Log::info('Scheduling webhook retry', [
+                    'delivery_id' => $delivery->id,
+                    'next_attempt' => $delivery->attempt,
+                    'delay_seconds' => $delay,
+                    'next_retry_at' => $delivery->next_retry_at->toIso8601String(),
+                ]);
+
+                // Dispatch retry with calculated delay after the transaction commits
+                self::dispatch($delivery->fresh())->delay($delay)->afterCommit();
+            }
+        });
     }
 
     /**

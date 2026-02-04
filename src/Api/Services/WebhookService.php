@@ -57,6 +57,9 @@ class WebhookService
                     $workspaceId
                 );
 
+                // Mark as queued to prevent duplicate processing
+                $delivery->update(['status' => WebhookDelivery::STATUS_QUEUED]);
+
                 $deliveries[] = $delivery;
 
                 // Queue the delivery job after the transaction commits
@@ -86,8 +89,9 @@ class WebhookService
 
         DB::transaction(function () use ($delivery) {
             // Reset status for manual retry but preserve attempt history
+            // Mark as queued to prevent duplicate processing
             $delivery->update([
-                'status' => WebhookDelivery::STATUS_PENDING,
+                'status' => WebhookDelivery::STATUS_QUEUED,
                 'next_retry_at' => null,
             ]);
 
