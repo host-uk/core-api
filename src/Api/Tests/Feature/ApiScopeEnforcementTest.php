@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Mod\Api\Models\ApiKey;
-use Mod\Tenant\Models\User;
-use Mod\Tenant\Models\Workspace;
+use Core\Api\Models\ApiKey;
+use Core\Tenant\Models\User;
+use Core\Tenant\Models\Workspace;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 

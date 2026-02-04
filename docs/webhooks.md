@@ -15,7 +15,7 @@ Webhooks allow your application to:
 ### Basic Webhook
 
 ```php
-use Mod\Api\Models\WebhookEndpoint;
+use Core\Api\Models\WebhookEndpoint;
 
 $webhook = WebhookEndpoint::create([
     'url' => 'https://your-app.com/webhooks',
@@ -43,7 +43,7 @@ $webhook = WebhookEndpoint::create([
 ### Manual Dispatch
 
 ```php
-use Mod\Api\Services\WebhookService;
+use Core\Api\Services\WebhookService;
 
 $webhookService = app(WebhookService::class);
 
@@ -58,7 +58,7 @@ $webhookService->dispatch('post.created', [
 ### From Model Events
 
 ```php
-use Mod\Api\Services\WebhookService;
+use Core\Api\Services\WebhookService;
 
 class Post extends Model
 {
@@ -85,7 +85,7 @@ class Post extends Model
 
 ```php
 use Mod\Blog\Actions\CreatePost;
-use Mod\Api\Services\WebhookService;
+use Core\Api\Services\WebhookService;
 
 class CreatePost
 {
@@ -157,7 +157,7 @@ X-Webhook-ID: evt_abc123
 ### Verifying Signatures
 
 ```php
-use Mod\Api\Services\WebhookSignature;
+use Core\Api\Services\WebhookSignature;
 
 public function handle(Request $request)
 {
@@ -227,7 +227,7 @@ foreach ($deliveries as $delivery) {
 ### Manual Retry
 
 ```php
-use Mod\Api\Models\WebhookDelivery;
+use Core\Api\Models\WebhookDelivery;
 
 $delivery = WebhookDelivery::find($id);
 
@@ -266,7 +266,7 @@ if ($delivery->isFailed()) {
 ### Test Endpoint
 
 ```php
-use Mod\Api\Models\WebhookEndpoint;
+use Core\Api\Models\WebhookEndpoint;
 
 $webhook = WebhookEndpoint::find($id);
 
@@ -290,7 +290,7 @@ if ($result['success']) {
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use Mod\Api\Facades\Webhooks;
+use Core\Api\Facades\Webhooks;
 
 class PostCreationTest extends TestCase
 {

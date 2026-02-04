@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Mod\Api\Services;
+namespace Core\Api\Services;
 
 use Carbon\Carbon;
-use Mod\Api\Models\ApiUsage;
-use Mod\Api\Models\ApiUsageDaily;
+use Core\Api\Models\ApiUsage;
+use Core\Api\Models\ApiUsageDaily;
+use Core\Api\Jobs\RecordApiUsageJob;
 
 /**
  * API Usage Service - tracks and reports API usage metrics.
@@ -17,6 +18,9 @@ class ApiUsageService
 {
     /**
      * Record an API request.
+     *
+     * This method dispatches a background job to record the usage metrics,
+     * removing database writes from the critical path of the API request.
      */
     public function record(
         int $apiKeyId,
@@ -29,28 +33,23 @@ class ApiUsageService
         ?int $responseSize = null,
         ?string $ipAddress = null,
         ?string $userAgent = null
-    ): ApiUsage {
+    ): void {
         // Normalise endpoint (remove query strings, IDs)
         $normalisedEndpoint = $this->normaliseEndpoint($endpoint);
 
-        // Record individual usage
-        $usage = ApiUsage::record(
-            $apiKeyId,
-            $workspaceId,
-            $normalisedEndpoint,
-            $method,
-            $statusCode,
-            $responseTimeMs,
-            $requestSize,
-            $responseSize,
-            $ipAddress,
-            $userAgent
-        );
-
-        // Update daily aggregation
-        ApiUsageDaily::recordFromUsage($usage);
-
-        return $usage;
+        RecordApiUsageJob::dispatch([
+            'api_key_id' => $apiKeyId,
+            'workspace_id' => $workspaceId,
+            'endpoint' => $normalisedEndpoint,
+            'method' => $method,
+            'status_code' => $statusCode,
+            'response_time_ms' => $responseTimeMs,
+            'request_size' => $requestSize,
+            'response_size' => $responseSize,
+            'ip_address' => $ipAddress,
+            'user_agent' => $userAgent,
+            'created_at' => now(),
+        ]);
     }
 
     /**
@@ -282,7 +281,7 @@ class ApiUsageService
 
         // Fetch API keys separately to avoid broken eager loading with aggregation
         $apiKeyIds = $aggregated->pluck('api_key_id')->filter()->unique()->all();
-        $apiKeys = \Mod\Api\Models\ApiKey::whereIn('id', $apiKeyIds)
+        $apiKeys = \Core\Api\Models\ApiKey::whereIn('id', $apiKeyIds)
             ->select('id', 'name', 'prefix')
             ->get()
             ->keyBy('id');

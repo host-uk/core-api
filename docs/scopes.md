@@ -91,7 +91,7 @@ Scopes follow the format: `resource:action`
 ### API Key Creation
 
 ```php
-use Mod\Api\Models\ApiKey;
+use Core\Api\Models\ApiKey;
 
 $apiKey = ApiKey::create([
     'name' => 'Mobile App',
@@ -121,7 +121,7 @@ $token = $user->createToken('mobile-app', [
 ### Route Protection
 
 ```php
-use Mod\Api\Middleware\EnforceApiScope;
+use Core\Api\Middleware\EnforceApiScope;
 
 // Single scope
 Route::middleware(['auth:sanctum', 'scope:posts:write'])
@@ -236,7 +236,7 @@ Define custom scopes for your modules:
 
 namespace Mod\Shop\Api;
 
-use Mod\Api\Contracts\ScopeProvider;
+use Core\Api\Contracts\ScopeProvider;
 
 class ShopScopeProvider implements ScopeProvider
 {
@@ -334,7 +334,7 @@ Route::middleware('scope-any:posts:write,pages:write')->post('/content', ...);
 ### API Key Scopes
 
 ```php
-use Mod\Api\Models\ApiKey;
+use Core\Api\Models\ApiKey;
 
 $apiKey = ApiKey::findByKey($providedKey);
 

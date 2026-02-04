@@ -66,7 +66,7 @@ class Boot
 ### Creating API Keys
 
 ```php
-use Mod\Api\Models\ApiKey;
+use Core\Api\Models\ApiKey;
 
 $apiKey = ApiKey::create([
     'name' => 'Mobile App',
@@ -117,7 +117,7 @@ X-RateLimit-Reset: 1640995200
 ### Creating Webhooks
 
 ```php
-use Mod\Api\Models\WebhookEndpoint;
+use Core\Api\Models\WebhookEndpoint;
 
 $webhook = WebhookEndpoint::create([
     'url' => 'https://your-app.com/webhooks',
@@ -130,7 +130,7 @@ $webhook = WebhookEndpoint::create([
 ### Dispatching Events
 
 ```php
-use Mod\Api\Services\WebhookService;
+use Core\Api\Services\WebhookService;
 
 $service = app(WebhookService::class);
 
@@ -144,7 +144,7 @@ $service->dispatch('post.created', [
 ### Verifying Signatures
 
 ```php
-use Mod\Api\Services\WebhookSignature;
+use Core\Api\Services\WebhookSignature;
 
 $signature = WebhookSignature::verify(
     payload: $request->getContent(),
@@ -164,9 +164,9 @@ if (!$signature) {
 Auto-generate OpenAPI documentation with attributes:
 
 ```php
-use Mod\Api\Documentation\Attributes\ApiTag;
-use Mod\Api\Documentation\Attributes\ApiParameter;
-use Mod\Api\Documentation\Attributes\ApiResponse;
+use Core\Api\Documentation\Attributes\ApiTag;
+use Core\Api\Documentation\Attributes\ApiParameter;
+use Core\Api\Documentation\Attributes\ApiResponse;
 
 #[ApiTag('Posts')]
 class PostController extends Controller
@@ -305,7 +305,7 @@ Route::middleware('api.rate-limit')
 namespace Tests\Feature\Api;
 
 use Tests\TestCase;
-use Mod\Api\Models\ApiKey;
+use Core\Api\Models\ApiKey;
 
 class PostApiTest extends TestCase
 {
