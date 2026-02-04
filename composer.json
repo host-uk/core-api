@@ -6,8 +6,19 @@
     "require": {
         "php": "^8.2",
         "host-uk/core": "@dev",
+        "host-uk/core-mcp": "@dev",
         "symfony/yaml": "^7.0"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/host-uk/core"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/host-uk/core-mcp"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Core\\Api\\": "src/Api/",
