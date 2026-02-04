@@ -171,7 +171,7 @@ class DeliverWebhookJob implements ShouldQueue
                     $delivery->markSuccess($statusCode, $responseBody);
 
                     Log::info('Webhook delivered successfully', [
-                        'delivery_id' => $delivery->id,
+                        'delivery_id' => $this->delivery->id,
                         'status_code' => $statusCode,
                     ]);
                 });
@@ -214,24 +214,24 @@ class DeliverWebhookJob implements ShouldQueue
             }
 
             Log::warning('Webhook delivery failed', [
-                'delivery_id' => $delivery->id,
-                'attempt' => $delivery->attempt,
+                'delivery_id' => $this->delivery->id,
+                'attempt' => $this->delivery->attempt,
                 'status_code' => $statusCode,
-                'can_retry' => $delivery->canRetry(),
+                'can_retry' => $this->delivery->canRetry(),
             ]);
 
             // Mark as failed (this also schedules retry if attempts remain)
             $delivery->markFailed($statusCode, $responseBody);
 
             // If we can retry, dispatch a new job with the appropriate delay
-            if ($delivery->canRetry() && $delivery->next_retry_at) {
-                $delay = $delivery->next_retry_at->diffInSeconds(now());
+            if ($this->delivery->canRetry() && $this->delivery->next_retry_at) {
+                $delay = $this->delivery->next_retry_at->diffInSeconds(now());
 
                 Log::info('Scheduling webhook retry', [
-                    'delivery_id' => $delivery->id,
-                    'next_attempt' => $delivery->attempt,
+                    'delivery_id' => $this->delivery->id,
+                    'next_attempt' => $this->delivery->attempt,
                     'delay_seconds' => $delay,
-                    'next_retry_at' => $delivery->next_retry_at->toIso8601String(),
+                    'next_retry_at' => $this->delivery->next_retry_at->toIso8601String(),
                 ]);
 
                 // Dispatch retry with calculated delay after the transaction commits
