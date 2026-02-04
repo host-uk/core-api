@@ -3,10 +3,24 @@
     "description": "REST API module for Core PHP framework",
     "keywords": ["laravel", "api", "rest", "json"],
     "license": "EUPL-1.2",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/host-uk/core-php"
+        }
+    ],
     "require": {
         "php": "^8.2",
         "host-uk/core": "@dev",
         "symfony/yaml": "^7.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "phpstan/phpstan": "^2.0",
+        "vimeo/psalm": "^6.0",
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^10.0"
     },
     "autoload": {
         "psr-4": {
