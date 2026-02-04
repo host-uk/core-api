@@ -5,9 +5,15 @@
     "license": "EUPL-1.2",
     "require": {
         "php": "^8.2",
-        "host-uk/core": "@dev",
+        "host-uk/core": "dev-main",
         "symfony/yaml": "^7.0"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/host-uk/core-php"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Core\\Api\\": "src/Api/",
@@ -19,6 +25,15 @@
             "providers": []
         }
     },
-    "minimum-stability": "stable",
+    "require-dev": {
+        "laravel/pint": "^1.13",
+        "nunomaduro/collision": "^8.1",
+        "orchestra/testbench": "^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "phpstan/phpstan": "^2.1",
+        "vimeo/psalm": "^6.0"
+    },
+    "minimum-stability": "dev",
     "prefer-stable": true
 }
