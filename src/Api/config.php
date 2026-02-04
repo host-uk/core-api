@@ -234,4 +234,18 @@ return [
         'max_per_page' => 100,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | MCP Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for Model Context Protocol (MCP) servers and execution.
+    |
+    */
+
+    'mcp' => [
+        // Execution timeout in seconds
+        'execution_timeout' => env('MCP_EXECUTION_TIMEOUT', 30),
+    ],
+
 ];
